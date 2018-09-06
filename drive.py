@@ -29,7 +29,7 @@ if __name__ == '__main__':
     scenario = Scenario(drivingMode=-1) #manual driving
     
     # Send the Start request to DeepGTAV. Dataset is set as default, we only receive frames at 10Hz (320, 160)
-    client.sendMessage(Start(scenario=scenario))
+    client.send_message(Start(scenario=scenario))
     
     # Dummy agent
     model = Model()
@@ -39,16 +39,16 @@ if __name__ == '__main__':
     while time.time() < stoptime:
         try:
             # We receive a message as a Python dictionary
-            message = client.recvMessage()  
+            message = client.recv_message()
                 
             # The frame is a numpy array that can we pass through a CNN for example     
             image = frame2numpy(message['frame'], (320,160))
             commands = model.run(image)
             # We send the commands predicted by the agent back to DeepGTAV to control the vehicle
-            client.sendMessage(Commands(commands[0], commands[1], commands[2]))
+            client.send_message(Commands(commands[0], commands[1], commands[2]))
         except KeyboardInterrupt:
             break
             
     # We tell DeepGTAV to stop
-    client.sendMessage(Stop())
+    client.send_message(Stop())
     client.close()

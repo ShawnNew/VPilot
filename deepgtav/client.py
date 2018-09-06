@@ -8,6 +8,7 @@ import gzip
 import os
 import numpy as np
 
+
 class Targets:
     def __init__(self, datasetPath, compressionLevel, divideByTrip):
         self.pickleFile = None
@@ -21,8 +22,10 @@ class Targets:
             self.pickleFile = gzip.open(fullpath, mode='ab', compresslevel=self.compressionLevel)
         elif self.datasetPath != None:
             while True:
-                if os.path.exists(os.path.dirname(self.datasetPath) + '\\' + 'trip' + str(self.carNum) + '.pz'): self.carNum += 1
-                else: break
+                if os.path.exists(os.path.dirname(self.datasetPath) + '\\' + 'trip' + str(self.carNum) + '.pz'):
+                    self.carNum += 1
+                else:
+                    break
 
     def parse(self, frame, lidar, jsonstr):
         try:
@@ -31,14 +34,14 @@ class Targets:
             return None
 
         if self.divideByTrip and self.datasetPath != None:
-            assert('drivingMode' in dct)
-            if dct['drivingMode'][0] == 0 :
+            assert ('drivingMode' in dct)
+            if dct['drivingMode'][0] == 0:
+                if not os.path.exists(self.datasetPath): os.mkdir(self.datasetPath)
                 fullpath = os.path.dirname(self.datasetPath) + '\\' + 'trip' + str(self.carNum) + '.pz'
-                if self.pickleFile != None: self.pickleFile.close()  
+                if self.pickleFile != None: self.pickleFile.close()
                 self.pickleFile = gzip.open(fullpath, mode='ab', compresslevel=self.compressionLevel)
                 self.carNum += 1
-                
-            
+
         if frame != None: dct['frame'] = frame
         if lidar != None: dct['lidar'] = np.frombuffer(lidar, dtype=np.float32)
         if self.pickleFile != None:
@@ -47,14 +50,14 @@ class Targets:
 
     def close(self):
         if self.pickleFile != None:
-            self.pickleFile.close()  
+            self.pickleFile.close()
+
 
 class Client:
     def __init__(self, ip='localhost', port=8000, datasetPath=None, compressionLevel=0, divideByTrip=False):
         print('Trying to connect to DeepGTAV')
-        
+
         self.targets = Targets(datasetPath, compressionLevel, divideByTrip)
-        self.frame, self.lidar = False, False
         self.check = np.array([0, 0])
 
         try:
@@ -65,7 +68,7 @@ class Client:
         else:
             print('Successfully connected to DeepGTAV')
 
-    def sendMessage(self, message):
+    def send_message(self, message):
         if str(message.__class__.__name__) == 'Start' or str(message.__class__.__name__) == 'Config':
             self.frame, self.lidar = message.activate_bytes_frame()
 
@@ -78,32 +81,33 @@ class Client:
             return False
         return True
 
-    def recvMessage(self):
+    def recv_message(self):
+        """
+        Receive all the data from the DeepGTAV server.
+        The frame, lida and message will arrive continuously
+        :return: None
+        """
 
-        if self.frame:
-            frame = self._recvall()
-            if not frame: 
-                print('ERROR: Failed to receive frame')     
-                return None
-        else: frame = None
+        frame = self._recvall()
+        if not frame:
+            print('ERROR: Failed to receive frame')
+            return None
 
-        if self.lidar:
-            lidar = self._recvall()
-            if not lidar: 
-                print('ERROR: Failed to receive lidar')     
-                return None
-        else: lidar = None
+
+        lidar = self._recvall()
+        if not lidar:
+            print('ERROR: Failed to receive lidar')
+            return None
 
         data = self._recvall()
-        if not data: 
-            print('ERROR: Failed to receive message')       
+        if not data:
+            print('ERROR: Failed to receive message')
             return None
 
         return self.targets.parse(frame, lidar, data.decode('utf-8'))
 
-            
     def _recvall(self):
-        #Receive first size of message in bytes, make up for 4 bytes then read
+        # Receive first size of message in bytes, make up for 4 bytes then read
         data = b""
         while len(data) < 4:
             packet = self.s.recv(4 - len(data))
@@ -111,7 +115,7 @@ class Client:
             data += packet
         size = struct.unpack('I', data)[0]
 
-        #We now proceed to receive the full message
+        # We now proceed to receive the full message
         data = b""
         while len(data) < size:
             packet = self.s.recv(size - len(data))
@@ -122,4 +126,3 @@ class Client:
     def close(self):
         self.s.close()
         self.targets.close()
-
