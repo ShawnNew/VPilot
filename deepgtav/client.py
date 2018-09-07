@@ -58,6 +58,7 @@ class Client:
         print('Trying to connect to DeepGTAV')
 
         self.targets = Targets(datasetPath, compressionLevel, divideByTrip)
+        self.frame, self.lidar = False, False
         self.check = np.array([0, 0])
 
         try:
@@ -88,16 +89,19 @@ class Client:
         :return: None
         """
 
-        frame = self._recvall()
-        if not frame:
-            print('ERROR: Failed to receive frame')
-            return None
+        if self.frame:
+            frame = self._recvall()
+            if not frame:
+                print('ERROR: Failed to receive frame')
+                return None
+        else: frame = None
 
-
-        lidar = self._recvall()
-        if not lidar:
-            print('ERROR: Failed to receive lidar')
-            return None
+        if self.lidar:
+            lidar = self._recvall()
+            if not lidar:
+                print('ERROR: Failed to receive lidar')
+                return None
+        else: lidar = None
 
         data = self._recvall()
         if not data:

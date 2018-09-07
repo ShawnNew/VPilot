@@ -40,7 +40,8 @@ Positions:
 			-1037.957886, -607.505615, 18.152155,
 			438.339630, -523.561157, 35.797802,
 			1000.059448, -906.553833, 30.398233,
-			1171.351563, -1925.791748, 36.220097]
+			1171.351563, -1925.791748, 36.220097
+			]
 
 	# city
 	location=[-1900.778442, -203.396835, 36.310143]							# western city
@@ -119,12 +120,14 @@ if __name__ == '__main__':
         rate=10, frame=[480, 320], throttle=True, brake=True, steering=True,
         speed=True, acceleration=True, yaw=True, yawRate=True, isCollide=True,
         location=True, drivingModeMsg=True,
-        lidar=[2, False, 100.0, 180, 90.0, 270.0, 15, 85.0, 130.0])  # , , vehicles=True, peds=True
+        lidar=[3, True, 100.0, 1000, 60.0, 300.0, 20, 85.0, 115.0],
+        vehicles=True, peds=True
+    )
     # Automatic driving scenario
-    scenario = Scenario(weather='EXTRASUNNY', vehicle='blista', time=[12, 0], drivingMode=[-1, 2, 25.0, 1.0, 1.0],
+    scenario = Scenario(vehicle='blista', time=[12, 0], drivingMode=[-2, 3, 25.0, 1.0, 1.0],
                         route=[
                             -1989.000000, -468.250000, 10.562500,
-                            1171.351563, -1925.791748, 36.220097
+                            689.279053, 26.910444, 83.943283
                         ])
 
     client.send_message(Start(scenario=scenario, dataset=dataset))  # Start request
