@@ -120,11 +120,14 @@ if __name__ == '__main__':
         rate=10, frame=[480, 320], throttle=True, brake=True, steering=True,
         speed=True, acceleration=True, yaw=True, yawRate=True, isCollide=True,
         location=True, drivingModeMsg=True,
-        lidar=[3, True, 100.0, 1000, 60.0, 300.0, 20, 85.0, 115.0],
+        # lidar=[3, True, 100.0, 1000, 60.0, 300.0, 20, 85.0, 115.0],
+        lidar=[5, True, 100.0, 180, 90.0, 270.0, 12, 75.0, 115.0],
         vehicles=True, peds=True
+
+
     )
     # Automatic driving scenario
-    scenario = Scenario(vehicle='blista', time=[12, 0], drivingMode=[-2, 3, 25.0, 1.0, 1.0],
+    scenario = Scenario(time=[12, 0], drivingMode=[-2, 3, 25.0, 1.0, 1.0],
                         route=[
                             -1989.000000, -468.250000, 10.562500,
                             689.279053, 26.910444, 83.943283

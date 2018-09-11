@@ -43,7 +43,7 @@ class Targets:
                 self.carNum += 1
 
         if frame != None: dct['frame'] = frame
-        if lidar != None: dct['lidar'] = np.frombuffer(lidar, dtype=np.float32)
+        if lidar != None: dct['lidar'] = lidar
         if self.pickleFile != None:
             pickle.dump(dct, self.pickleFile)
         return dct

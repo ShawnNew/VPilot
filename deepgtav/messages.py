@@ -3,6 +3,7 @@
 
 import json
 import numpy as np
+from ctypes import *
 from numpy.lib.stride_tricks import as_strided
 
 
@@ -195,9 +196,36 @@ class Commands:
         return json.dumps({'commands': self.__dict__})
 
 
+class Ray(Structure):
+    _fields_ = [
+        ('x', c_float),
+        ('y', c_float),
+        ('z', c_float),
+        ('entityType', c_int),
+        ('rayResult', c_int),
+        ('range', c_float)
+    ]
+
+
 def frame2numpy(frame, frameSize):
     buff = np.fromstring(frame, dtype='uint8')
     # Scanlines are aligned to 4 bytes in Windows bitmaps
     strideWidth = int((frameSize[0] * 3 + 3) / 4) * 4
     # Return a copy because custom strides are not supported by OpenCV.
     return as_strided(buff, strides=(strideWidth, 3, 1), shape=(frameSize[1], frameSize[0], 3)).copy()
+
+def lidar2numpy(lidar):
+    result = []
+    x = Ray()
+    ##TODO: parse the lidar data with struct Ray
+    records = iter(lidar, sizeof(x))
+    for item in records:
+        lidar_dict = {}
+        lidar_dict['x'] = item.x
+        lidar_dict['y'] = item.y
+        lidar_dict['z'] = item.z
+        lidar_dict['entityType'] = item.entityType
+        lidar_dict['rayResult'] = item.rayResult
+        lidar_dict['range'] = item.range
+        result.append(lidar_dict)
+    return result
