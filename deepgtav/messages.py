@@ -3,7 +3,7 @@
 
 import json
 import numpy as np
-from ctypes import *
+import struct
 from numpy.lib.stride_tricks import as_strided
 
 
@@ -196,17 +196,6 @@ class Commands:
         return json.dumps({'commands': self.__dict__})
 
 
-class Ray(Structure):
-    _fields_ = [
-        ('x', c_float),
-        ('y', c_float),
-        ('z', c_float),
-        ('entityType', c_int),
-        ('rayResult', c_int),
-        ('range', c_float)
-    ]
-
-
 def frame2numpy(frame, frameSize):
     buff = np.fromstring(frame, dtype='uint8')
     # Scanlines are aligned to 4 bytes in Windows bitmaps
@@ -214,18 +203,32 @@ def frame2numpy(frame, frameSize):
     # Return a copy because custom strides are not supported by OpenCV.
     return as_strided(buff, strides=(strideWidth, 3, 1), shape=(frameSize[1], frameSize[0], 3)).copy()
 
-def lidar2numpy(lidar):
+def lidar_parser(lidar):
+    """
+    parser function to extract lidar data from bytes stream, lidar data looks like following.
+    :param lidar:
+    :return: list of formatted lidar data
+    x          :   x coordinate
+    y          :   y coordinate
+    z          :   z coordinate
+    entityType :   0->None, 1->Ped, 2->Vehicle, 3->Prop
+    rayResult  :   0->not hit, 1->hit
+    range      :   distance from the sensor to the hit object
+    """
+    lidar_struct = struct.Struct('fffIIf')
     result = []
-    x = Ray()
-    ##TODO: parse the lidar data with struct Ray
-    records = iter(lidar, sizeof(x))
-    for item in records:
-        lidar_dict = {}
-        lidar_dict['x'] = item.x
-        lidar_dict['y'] = item.y
-        lidar_dict['z'] = item.z
-        lidar_dict['entityType'] = item.entityType
-        lidar_dict['rayResult'] = item.rayResult
-        lidar_dict['range'] = item.range
-        result.append(lidar_dict)
+    item_size = lidar_struct.size
+    num = (int)(len(lidar) / lidar_struct.size)
+
+    for i in range(num):
+        data = lidar_struct.unpack_from(lidar, i*item_size)
+        format_data = {}
+        format_data['x'] = data[0]
+        format_data['y'] = data[1]
+        format_data['z'] = data[2]
+        format_data['entityType'] = data[3]
+        format_data['rayResult'] = data[4]
+        format_data['range'] = data[5]
+        result.append(format_data)
+
     return result

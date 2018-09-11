@@ -119,9 +119,9 @@ if __name__ == '__main__':
     dataset = Dataset(
         rate=10, frame=[480, 320], throttle=True, brake=True, steering=True,
         speed=True, acceleration=True, yaw=True, yawRate=True, isCollide=True,
-        location=True, drivingModeMsg=True,
+        location=True, drivingModeMsg=True, cameraInfo=True, rageMatrices=True,
         # lidar=[3, True, 100.0, 1000, 60.0, 300.0, 20, 85.0, 115.0],
-        lidar=[5, True, 100.0, 180, 90.0, 270.0, 12, 75.0, 115.0],
+        lidar=[5, True, 100.0, 1800, 90.0, 270.0, 120, 75.0, 115.0],
         vehicles=True, peds=True
 
 

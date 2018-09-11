@@ -39,8 +39,9 @@ if __name__ == '__main__':
                 dct = pickle.load(f)
                 # show frame
                 frame = frame2numpy(dct['frame'], (480, 320))
-                lidar = lidar2numpy(dct['lidar'])
+                lidar = lidar_parser(dct['lidar'])
                 # frame_list.append(frame)
+                ##TODO: draw bounding box and label
                 cv2.imshow('Video', frame)
                 if cv2.waitKey(80) & 0xFF == ord('q'):
                     break
